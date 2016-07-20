@@ -1,2 +1,2 @@
-config BOARD_AMD_OLIVEHILL
-	bool "Olive Hill"
+config BOARD_BIOSTAR_A68N5200
+	bool "A68N-5200"
