@@ -2,6 +2,7 @@
 # This file is part of the coreboot project.
 #
 # Copyright (C) 2013 Advanced Micro Devices, Inc.
+# Copyright (C) 2016 Edward O'Callaghan
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,9 +31,9 @@ chip northbridge/amd/agesa/family16kb/root_complex
 				device pci 2.0 on  end # PCIe Host Bridge
 				device pci 2.1 on  end # x4 PCIe slot
 				device pci 2.2 on  end # mPCIe slot
-				device pci 2.3 on  end # Realtek NIC
-				device pci 2.4 on  end # Edge Connector
-				device pci 2.5 on  end # Edge Connector
+				device pci 2.3 off  end # Realtek NIC
+				device pci 2.4 off  end # Edge Connector
+				device pci 2.5 off  end # Edge Connector
 			end	#chip northbridge/amd/agesa/family16kb
 
 			chip southbridge/amd/agesa/hudson # it is under NB/SB Link, but on the same pci bus
@@ -51,8 +52,42 @@ chip northbridge/amd/agesa/family16kb/root_complex
 					end
 				end # SM
 				device pci 14.2 on  end # HDA	0x4383
-				device pci 14.3 on  end # LPC	0x439d
-				device pci 14.7 on  end # SD
+				device pci 14.3 on      # LPC	0x439d
+					chip superio/ite/it8728f
+						#register "multi_function_register_1" = "0x01"
+						device pnp 2e.01 on		# COM1
+							io 0x60 = 0x3f8
+							irq 0x70 = 4
+						end
+						device pnp 2e.02 off		# COM2
+							io 0x60 = 0x2f8
+							irq 0x70 = 3
+						end
+						device pnp 2e.03 on		# Parallel Port
+							io 0x60 = 0x378
+							irq 0x70 = 5
+							drq 0x74 = 4
+						end
+						device pnp 2e.04 on		# Hardware Monitor
+							io 0x60 = 0xa00
+							io 0x62 = 0xa20
+							irq 0x70 = 0
+# XXX
+							io 0xf1 = 0x400
+							io 0xf3 = 0x0a0
+							io 0xf5 = 0x0f0
+							io 0xf9 = 0x4a0
+# XXX
+						end
+						device pnp 2e.05 on		# KBC
+							io 0x60 = 0x060
+						end
+						device pnp 2e.06 on end		# KBC?
+						device pnp 2e.07 on end		# GPIO XXX
+						device pnp 2e.0a off end	# IR
+					end # ITE IT8728F
+				end #LPC
+				device pci 14.7 off  end # SD
 			end	#chip southbridge/amd/hudson
 
 			device pci 18.0 on  end
