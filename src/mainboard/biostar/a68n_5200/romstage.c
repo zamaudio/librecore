@@ -138,7 +138,9 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 		val = inb(0xcd6);
 
 	post_code(0x37);
+	printk(BIOS_INFO, "amdinitreset() starting..\n");
 	agesawrapper_amdinitreset();
+	printk(BIOS_INFO, "amdinitreset() finished.\n");
 	post_code(0x38);
 	printk(BIOS_DEBUG, "Got past yangtze_early_setup\n");
 
