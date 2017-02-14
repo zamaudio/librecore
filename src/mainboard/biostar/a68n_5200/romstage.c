@@ -168,8 +168,8 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 		prepare_for_resume();
 	}
 
-	outb(0xEA, 0xCD6);
-	outb(0x1, 0xcd7);
+//	outb(0xEA, 0xCD6);
+//	outb(0x1, 0xcd7);
 
 	post_code(0x50);
 	copy_and_run();
