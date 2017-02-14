@@ -51,13 +51,15 @@ static void sbxxx_enable_48mhzout(void)
 	/* Set auxiliary output clock frequency on OSCOUT1 pin to be 48MHz */
 	u32 reg32;
 	reg32 = SB_MMIO_MISC32(0x28);
-	reg32 &= 0xffc7ffff;
-	reg32 |= 0x00100000;
+	//reg32 &= 0xffc7ffff;
+	//reg32 |= 0x00100000;
+	reg32 &= 0xfff8ffff;
 	SB_MMIO_MISC32(0x28) = reg32;
 
 	/* Enable Auxiliary Clock1, disable FCH 14 MHz OscClk */
 	reg32 = SB_MMIO_MISC32(0x40);
-	reg32 &= ~0x80u;
+	//reg32 &= ~0x80u;
+	reg32 &= 0xffffbffb;
 	SB_MMIO_MISC32(0x40) = reg32;
 }
 
@@ -78,18 +80,13 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 	amd_initmmio();
 
 	/* Set LPC decode enables. */
-	pci_devfn_t dev2 = PCI_DEV(0, 0x14, 3);
-	pci_write_config32(dev2, 0x44, 0xff03ffd5);
-
 	hudson_lpc_port80();
 
-	/* Enable the AcpiMmio space */
-	outb(0x24, 0xcd6);
-	outb(0x1, 0xcd7);
+	dev = PCI_DEV(0, 0x14, 3);
+	pci_write_config32(dev, 0x44, 0xff03ffd5);
 
 	if (!cpu_init_detectedx && boot_cpu()) {
 		/* enable SIO LPC decode */
-		dev = PCI_DEV(0, 0x14, 3);
 		byte = pci_read_config8(dev, 0x48);
 		byte |= 3;	/* 2e, 2f */
 		pci_write_config8(dev, 0x48, byte);
@@ -101,6 +98,10 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 
 		post_code(0x30);
 
+		/* Enable the AcpiMmio space */
+		outb(0x24, 0xcd6);
+		outb(0x1, 0xcd7);
+
 		/* run ite */
 		sbxxx_enable_48mhzout();
 		ite_conf_clkin(CLKIN_DEV, ITE_UART_CLK_PREDIVIDE_48);
@@ -108,6 +109,12 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 		ite_enable_serial(SERIAL_DEV, CONFIG_TTYS0_BASE);
 
 		console_init();
+
+		/* turn on secondary smbus at b20 */
+		outb(0x28, 0xcd6);
+		byte = inb(0xcd7);
+		byte |= 1;
+		outb(byte, 0xcd7);
 	}
 	printk(BIOS_DEBUG, "Console inited!\n");
 
