@@ -69,6 +69,13 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 	u8 byte;
 	pci_devfn_t dev;
 
+#if IS_ENABLED(CONFIG_POST_DEVICE_PCI_PCIE)
+	hudson_pci_port80();
+#endif
+#if IS_ENABLED(CONFIG_POST_DEVICE_LPC)
+	hudson_lpc_port80();
+#endif
+
 	/* In Hudson RRG, PMIOxD2[5:4] is "Drive strength control for
 	 *  LpcClk[1:0]".  To be consistent with Parmer, setting to 4mA
 	 *  even though the register is not documented in the Kabini BKDG.
@@ -80,8 +87,6 @@ void cache_as_ram_main(unsigned long bist, unsigned long cpu_init_detectedx)
 	amd_initmmio();
 
 	/* Set LPC decode enables. */
-	hudson_lpc_port80();
-
 	dev = PCI_DEV(0, 0x14, 3);
 	pci_write_config32(dev, 0x44, 0xff03ffd5);
 
