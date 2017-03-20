@@ -23,8 +23,7 @@
 #include "sb800.h"
 #include "smbus.h"
 
-#define SMBUS_IO_BASE 0x6000	/* Is it a temporary SMBus I/O base address? */
-	 /*SIZE 0x40 */
+#define SMBUS_IO_BASE 0xb00
 
 static void pmio_write(u8 reg, u8 value)
 {
