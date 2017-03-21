@@ -19,7 +19,7 @@
 #include <arch/io.h>
 #include <reset.h>
 
-#include <northbridge/amd/amdk8/reset_test.c>
+#include <northbridge/amd/amdfam10/reset_test.h>
 
 void hard_reset(void)
 {
