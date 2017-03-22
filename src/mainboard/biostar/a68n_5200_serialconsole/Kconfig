@@ -1,0 +1,93 @@
+#
+# This file is part of the coreboot project.
+#
+# Copyright (C) 2012 Advanced Micro Devices, Inc.
+# Copyright (C) 2016 Edward O'Callaghan
+# Copyright (C) 2016 Damien Zammit <damien@zamaudio.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+
+if BOARD_BIOSTAR_A68N5200_SERIALCONSOLE
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	select CPU_AMD_SOCKET_BGA_F16KB
+	select DIMM_DDR3
+	select DIMM_REGISTERED
+	select DIMM_VOLTAGE_SET_SUPPORT
+	select NORTHBRIDGE_AMD_AMDFAM10
+	select SOUTHBRIDGE_AMD_SB900
+	select SUPERIO_ITE_IT8728F
+	select BOARD_ROMSIZE_KB_4096
+	select HAVE_OPTION_TABLE
+	select ENABLE_APIC_EXT_ID
+
+config MMCONF_BASE_ADDRESS
+	hex
+	default 0xf8000000
+
+config MMCONF_BUS_NUMBER
+	int
+	default 64
+
+config HT_CHAIN_END_UNITID_BASE
+	hex
+	default 0x1
+
+config HT_CHAIN_UNITID_BASE
+	hex
+	default 0x0
+
+config MAINBOARD_DIR
+	string
+	default "biostar/a68n_5200_serialconsole"
+
+config MAINBOARD_PART_NUMBER
+	string
+	default "A68N5200"
+
+config BOOTBLOCK_MAINBOARD_INIT
+	string
+	default "mainboard/biostar/a68n_5200_serialconsole/bootblock.c"
+
+config DCACHE_RAM_BASE
+	hex
+	default 0x30000
+
+config DCACHE_RAM_SIZE
+	hex
+	default 0x10000
+
+config APIC_ID_OFFSET
+	hex
+	default 0
+
+config HW_MEM_HOLE_SIZEK
+	hex
+	default 0x200000
+
+config MAX_CPUS
+	int
+	default 32
+
+config MAX_PHYSICAL_CPUS
+	int
+	default 1
+
+config IRQ_SLOT_COUNT
+	int
+	default 13
+
+config ONBOARD_VGA_IS_PRIMARY
+	bool
+	default y
+
+endif
