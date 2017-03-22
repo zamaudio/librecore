@@ -34,6 +34,10 @@
 #include <southbridge/amd/sb800/sb800.h>
 #endif
 
+#if IS_ENABLED(CONFIG_SOUTHBRIDGE_AMD_SB900)
+#include <southbridge/amd/sb900/sb900.h>
+#endif
+
 #include "cpu/amd/car/post_cache_as_ram.c"
 
 #if CONFIG_PCI_IO_CFG_EXT
@@ -1036,7 +1040,8 @@ void cpuSetAMDMSR(uint8_t node_id)
 		}
 	}
 
-#if IS_ENABLED(CONFIG_SOUTHBRIDGE_AMD_SB700) || IS_ENABLED(CONFIG_SOUTHBRIDGE_AMD_SB800)
+#if IS_ENABLED(CONFIG_SOUTHBRIDGE_AMD_SB700) || IS_ENABLED(CONFIG_SOUTHBRIDGE_AMD_SB800) \
+		|| IS_ENABLED(CONFIG_SOUTHBRIDGE_AMD_SB900)
 	if (revision & (AMD_DR_GT_D0 | AMD_FAM15_ALL)) {
 		/* Set up message triggered C1E */
 		msr = rdmsr(0xc0010055);

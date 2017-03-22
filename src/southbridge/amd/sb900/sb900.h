@@ -37,6 +37,7 @@
 #define ACPI_PM_TMR_BLK		(SB900_ACPI_IO_BASE + 0x18) /* 4 bytes */
 #define ACPI_GPE0_BLK		(SB900_ACPI_IO_BASE + 0x10) /* 8 bytes */
 #define ACPI_CPU_CONTROL	(SB900_ACPI_IO_BASE + 0x08) /* 6 bytes */
+#define ACPI_CPU_P_LVL2		(ACPI_CPU_CONTROL + 0x4)    /* 1 byte */
 
 #define ACPI_SMI_CTL_PORT		0xb2
 #define ACPI_SMI_CMD_CST_CONTROL	0xde
