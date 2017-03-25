@@ -4,6 +4,7 @@ source src/cpu/amd/socket_940/Kconfig
 source src/cpu/amd/socket_AM2/Kconfig
 source src/cpu/amd/socket_AM2r2/Kconfig
 source src/cpu/amd/socket_AM3/Kconfig
+source src/cpu/amd/socket_BGA_f16kb/Kconfig
 source src/cpu/amd/socket_C32/Kconfig
 source src/cpu/amd/socket_FM2/Kconfig
 source src/cpu/amd/socket_G34/Kconfig
