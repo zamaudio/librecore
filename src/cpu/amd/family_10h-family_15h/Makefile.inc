@@ -1,3 +1,5 @@
+CFLAGS_x86_32 += -march=k8-sse3 -mtune=k8-sse3 -fno-zero-initialized-in-bss -fno-strict-aliasing
+
 romstage-y += ../../x86/mtrr/earlymtrr.c
 
 romstage-y += init_cpus.c
