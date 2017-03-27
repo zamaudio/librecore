@@ -2,6 +2,7 @@
  * This file is part of the coreboot project.
  *
  * Copyright (C) 2002 Eric Biederman <ebiederm@xmission.com>
+ * Copyright (C) 2017 Damien Zammit <damien@zamaudio.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@
 
 	/* Enable SSE instructions. */
 	movl	%cr4, %eax
-	orl	$(1 << 9), %eax
+	orl	$(3 << 9), %eax
 	movl	%eax, %cr4
 
 	/* Restore BIST. */
