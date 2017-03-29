@@ -104,6 +104,9 @@ uint64_t mctGetLogicalCPUID(u32 Node)
 	case 0x15101:
 		ret = AMD_OR_C0;
 		break;
+	case 0x16001: /* XXX FAM16h */
+		ret = AMD_SAFEMODE;
+		break;
 	default:
 		/* FIXME: mabe we should die() here. */
 		printk(BIOS_ERR, "FIXME! CPU Version unknown or not supported! %08x\n", valx);
