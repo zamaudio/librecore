@@ -29,7 +29,8 @@ config NUM_IPI_STARTS
 
 config CPU_ADDR_BITS
 	int
-	default 48
+	default 48 if !CPU_AMD_SOCKET_BGA_F16KB
+	default 40 if CPU_AMD_SOCKET_BGA_F16KB
 
 config DCACHE_RAM_BASE
 	hex
