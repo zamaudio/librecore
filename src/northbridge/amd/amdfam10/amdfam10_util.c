@@ -105,7 +105,7 @@ uint64_t mctGetLogicalCPUID(u32 Node)
 		ret = AMD_OR_C0;
 		break;
 	case 0x16001: /* XXX FAM16h */
-		ret = AMD_SAFEMODE;
+		ret = AMD_FAM16;
 		break;
 	default:
 		/* FIXME: mabe we should die() here. */

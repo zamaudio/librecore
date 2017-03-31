@@ -48,6 +48,7 @@
 #define	AMD_PH_E0	0x0000000040000000	/* Phenom II X4 X6 */
 #define	AMD_OR_B2	0x0000000080000000	/* Interlagos */
 #define	AMD_OR_C0	0x0000000100000000	/* Abu Dhabi */
+#define	AMD_FAM16	0x0000000200000000	/* Kabini ? */
 
 /*
  * Groups - Create as many as you wish, from the above public values
@@ -79,7 +80,7 @@
 #define	AMD_DRBH_Cx		(AMD_DR_Cx | AMD_HY_D0)
 #define	AMD_DRBA23_RBC2		(AMD_DR_BA | AMD_DR_B2 | AMD_DR_B3 | AMD_RB_C2)
 #define	AMD_DR_DAC2_OR_C3	(AMD_DA_C2 | AMD_DA_C3 | AMD_RB_C3)
-#define	AMD_FAM15_ALL		(AMD_OR_B2 | AMD_OR_C0)
+#define	AMD_FAM15_ALL		(AMD_OR_B2 | AMD_OR_C0 | AMD_FAM16)
 
 /*
  *  Public Platforms - USE THESE VERSIONS TO MAKE COMPARE WITH CPUPLATFORMTYPE RETURN VALUE
