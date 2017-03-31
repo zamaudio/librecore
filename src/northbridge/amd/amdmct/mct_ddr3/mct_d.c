@@ -6733,7 +6733,7 @@ void mct_ForceNBPState0_En_Fam15(struct MCTStatStruc *pMCTstat,
 		dword |= ((dword & 0x3) << 3);
 		Set_NB32(pDCTstat->dev_nbctl, 0x170, dword);
 
-		if (!is_model10_1f()) {
+		if (!is_model10_1f() && !is_fam16h()) {
 			/* Wait until CurNbPState == NbPstateLo */
 			do {
 				dword2 = Get_NB32(pDCTstat->dev_nbctl, 0x174);
@@ -6744,7 +6744,7 @@ void mct_ForceNBPState0_En_Fam15(struct MCTStatStruc *pMCTstat,
 		dword |= (0x3 << 14);		/* SwNbPstateLoDis = 1 */
 		Set_NB32(pDCTstat->dev_nbctl, 0x170, dword);
 
-		if (!is_model10_1f()) {
+		if (!is_model10_1f() && !is_fam16h()) {
 			/* Wait until CurNbPState == 0 */
 			do {
 				dword2 = Get_NB32(pDCTstat->dev_nbctl, 0x174);
@@ -7238,7 +7238,7 @@ void InitPhyCompensation(struct MCTStatStruc *pMCTstat,
 		dword |= (0x8000 | tx_pre);
 		Set_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0f2202, dword);
 
-		if (!is_model10_1f()) {
+		if (!is_model10_1f() && !is_fam16h()) {
 			/* Be extra safe and wait for the predriver calibration
 			 * to be applied to the hardware.  The BKDG does not
 			 * require this, but it does take some time for the
