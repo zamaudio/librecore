@@ -35,6 +35,21 @@ static uint8_t is_fam15h(void)
 	return fam15h;
 }
 
+static uint8_t is_fam16h(void)
+{
+	uint8_t fam16h = 0;
+	uint32_t family;
+
+	family = cpuid_eax(0x80000001);
+	family = ((family & 0xf00000) >> 16) | ((family & 0xf00) >> 8);
+
+	if (family == 0x7f)
+		/* Family 16h */
+		fam16h = 1;
+
+	return fam16h;
+}
+
 uint8_t fam15_dimm_dic(struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t dimm, uint8_t rank, uint8_t package_type)
 {
 	uint8_t dic;
@@ -70,7 +85,7 @@ uint8_t fam15_rttwr(struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t dimm, ui
 
 	uint8_t MaxDimmsInstallable = mctGet_NVbits(NV_MAX_DIMMS_PER_CH);
 
-	if (is_fam15h()) {
+	if (is_fam15h() && !is_fam16h()) {
 		if (pDCTstat->Status & (1 << SB_LoadReduced)) {
 			/* TODO
 			 * LRDIMM unimplemented
@@ -279,6 +294,20 @@ uint8_t fam15_rttwr(struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t dimm, ui
 				*/
 			}
 		}
+	} else if (is_fam15h() && is_fam16h()) {
+		/* UDIMM */
+		/* Socket FT3: Fam16h */
+		if (MaxDimmsInstallable == 1) {
+			term = 0x0;
+		} else if (MaxDimmsInstallable == 2) {
+			if ((number_of_dimms == 2) && (frequency_index >= 0x12)) {
+				term = 0x1;
+			} else if (number_of_dimms == 1) {
+				term = 0x0;
+			} else {
+				term = 0x2;
+			}
+		}
 	}
 
 	printk(BIOS_INFO, "DIMM %d RttWr: %01x\n", dimm, term);
@@ -302,7 +331,7 @@ uint8_t fam15_rttnom(struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t dimm, u
 
 	uint8_t MaxDimmsInstallable = mctGet_NVbits(NV_MAX_DIMMS_PER_CH);
 
-	if (is_fam15h()) {
+	if (is_fam15h() && !is_fam16h()) {
 		if (pDCTstat->Status & (1 << SB_LoadReduced)) {
 			/* TODO
 			 * LRDIMM unimplemented
@@ -677,6 +706,38 @@ uint8_t fam15_rttnom(struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t dimm, u
 				 */
 			}
 		}
+	} else if (is_fam16h()) {
+		/* Socket FT3: Fam16h */
+		if (MaxDimmsInstallable == 1) {
+			if ((frequency_index == 0x4)
+					|| (frequency_index == 0x6)
+					|| (frequency_index == 0xa))
+				term = 0x2;
+			else
+				term = 0x1;
+		}
+		if (MaxDimmsInstallable == 2) {
+			if (number_of_dimms == 1) {
+				if (frequency_index <= 0xa) {
+					term = 0x2;
+				} else {
+					term = 0x1;
+				}
+			} else {
+				if (frequency_index <= 0x6) {
+					term = 0x3;
+				} else if (frequency_index == 0xe
+						|| frequency_index == 0xa) {
+					term = 0x5;
+				} else {
+					term = 0x4;
+				}
+			}
+		}
+	} else {
+		/* TODO
+		 * Other sockets unimplemented
+		 */
 	}
 
 	printk(BIOS_INFO, "DIMM %d RttNom: %01x\n", dimm, term);
