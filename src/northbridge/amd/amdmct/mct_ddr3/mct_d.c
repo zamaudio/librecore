@@ -7416,7 +7416,7 @@ static void mct_ProgramODT_D(struct MCTStatStruc *pMCTstat,
 
 	uint8_t MaxDimmsInstallable = mctGet_NVbits(NV_MAX_DIMMS_PER_CH);
 
-	if (is_fam15h()) {
+	if (is_fam15h() && !is_fam16h()) {
 		/* Obtain number of DIMMs on channel */
 		uint8_t dimm_count = pDCTstat->MAdimms[dct];
 		uint8_t rank_count_dimm0;
@@ -7551,6 +7551,102 @@ static void mct_ProgramODT_D(struct MCTStatStruc *pMCTstat,
 				odt_pattern_2 = 0x00000000;
 				odt_pattern_3 = 0x00000000;
 			}
+		}
+
+		if (pDCTstat->Status & (1 << SB_LoadReduced)) {
+			/* TODO
+			 * Load reduced dimms UNIMPLEMENTED
+			 */
+			write_odt_duration = 0x0;
+			read_odt_duration = 0x0;
+			write_odt_delay = 0x0;
+			read_odt_delay = 0x0;
+		} else {
+			uint8_t tcl;
+			uint8_t tcwl;
+			tcl = Get_NB32_DCT(dev, dct, 0x200) & 0x1f;
+			tcwl = Get_NB32_DCT(dev, dct, 0x20c) & 0x1f;
+
+			write_odt_duration = 0x6;
+			read_odt_duration = 0x6;
+			write_odt_delay = 0x0;
+			if (tcl > tcwl)
+				read_odt_delay = tcl - tcwl;
+			else
+				read_odt_delay = 0x0;
+		}
+
+		/* Program ODT pattern */
+		Set_NB32_DCT(dev, dct, 0x230, odt_pattern_1);
+		Set_NB32_DCT(dev, dct, 0x234, odt_pattern_0);
+		Set_NB32_DCT(dev, dct, 0x238, odt_pattern_3);
+		Set_NB32_DCT(dev, dct, 0x23c, odt_pattern_2);
+		dword = Get_NB32_DCT(dev, dct, 0x240);
+		dword &= ~(0x7 << 12);				/* WrOdtOnDuration = write_odt_duration */
+		dword |= (write_odt_duration & 0x7) << 12;
+		dword &= ~(0x7 << 8);				/* WrOdtTrnOnDly = write_odt_delay */
+		dword |= (write_odt_delay & 0x7) << 8;
+		dword &= ~(0xf << 4);				/* RdOdtOnDuration = read_odt_duration */
+		dword |= (read_odt_duration & 0xf) << 4;
+		dword &= ~(0xf);				/* RdOdtTrnOnDly = read_odt_delay */
+		dword |= (read_odt_delay & 0xf);
+		Set_NB32_DCT(dev, dct, 0x240, dword);
+
+		printk(BIOS_SPEW, "Programmed DCT %d ODT pattern %08x %08x %08x %08x\n", dct, odt_pattern_0, odt_pattern_1, odt_pattern_2, odt_pattern_3);
+
+	} else if (is_fam15h() && is_fam16h()) {
+		/* Obtain number of DIMMs on channel */
+		uint8_t dimm_count = pDCTstat->MAdimms[dct];
+		uint8_t rank_count;
+		uint32_t odt_pattern_0;
+		uint32_t odt_pattern_1;
+		uint32_t odt_pattern_2;
+		uint32_t odt_pattern_3;
+		uint8_t write_odt_duration;
+		uint8_t read_odt_duration;
+		uint8_t write_odt_delay;
+		uint8_t read_odt_delay;
+
+		/* NOTE
+		 * Rank count per DIMM and DCT is encoded by pDCTstat->DimmRanks[(<dimm number> * 2) + dct]
+		 */
+
+		if (MaxDimmsInstallable == 2) {
+			if (dimm_count == 1) {
+				/* 1 DIMM detected */
+				rank_count = pDCTstat->DimmRanks[(1 * 2) + dct];
+				if (rank_count == 1) {
+					odt_pattern_0 = 0x00000000;
+					odt_pattern_1 = 0x00000000;
+					odt_pattern_2 = 0x00000000;
+					odt_pattern_3 = 0x00040000;
+				} else if (rank_count == 2) {
+					odt_pattern_0 = 0x00000000;
+					odt_pattern_1 = 0x00000000;
+					odt_pattern_2 = 0x00000000;
+					odt_pattern_3 = 0x08040000;
+				} else {
+					/* Fallback */
+					odt_pattern_0 = 0x00000000;
+					odt_pattern_1 = 0x00000000;
+					odt_pattern_2 = 0x00000000;
+					odt_pattern_3 = 0x08040000;
+				}
+			} else {
+				/* 2 DIMMs detected */
+				odt_pattern_0 = 0x00000000;
+				odt_pattern_1 = 0x01010404;
+				odt_pattern_2 = 0x00000000;
+				odt_pattern_3 = 0x09050605;
+			}
+		} else {
+			/* FIXME
+			 * 3 DIMMs per channel UNIMPLEMENTED
+			 */
+			odt_pattern_0 = 0x00000000;
+			odt_pattern_1 = 0x00000000;
+			odt_pattern_2 = 0x00000000;
+			odt_pattern_3 = 0x00000000;
 		}
 
 		if (pDCTstat->Status & (1 << SB_LoadReduced)) {
