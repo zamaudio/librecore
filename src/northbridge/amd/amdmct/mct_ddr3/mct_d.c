@@ -6812,6 +6812,8 @@ static u32 mct_NodePresent_D(void)
 	if (is_fam15h()) {
 		if (is_model10_1f()) {
 			val = 0x14001022;
+		} else if (is_fam16h()) {
+			val = 0x15301022;
 		} else {
 			val = 0x16001022;
 		}

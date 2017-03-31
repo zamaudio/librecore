@@ -38,6 +38,21 @@ static inline uint8_t is_fam15h(void)
 	return fam15h;
 }
 
+static inline uint8_t is_fam16h(void)
+{
+	uint8_t fam16h = 0;
+	uint32_t family;
+
+	family = cpuid_eax(0x80000001);
+	family = ((family & 0xf00000) >> 16) | ((family & 0xf00) >> 8);
+
+	if (family == 0x7f)
+		/* Family 16h */
+		fam16h = 1;
+
+	return fam16h;
+}
+
 struct DCTStatStruc;
 struct MCTStatStruc;
 
