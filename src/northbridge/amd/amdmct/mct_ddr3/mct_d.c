@@ -158,8 +158,6 @@ static u8 Get_Latency_Diff(struct MCTStatStruc *pMCTstat,
 static void SyncSetting(struct DCTStatStruc *pDCTstat);
 static uint8_t crcCheck(struct DCTStatStruc *pDCTstat, uint8_t dimm);
 
-uint8_t is_ecc_enabled(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstat);
-
 /*See mctAutoInitMCT header for index relationships to CL and T*/
 static const u16 Table_F_k[]	= {00,200,266,333,400,533 };
 static const u8 Tab_BankAddr[]	= {0x3F,0x01,0x09,0x3F,0x3F,0x11,0x0A,0x19,0x12,0x1A,0x21,0x22,0x23};
@@ -2775,6 +2773,7 @@ restartinit:
 		printk(BIOS_DEBUG, "mctAutoInitMCT_D: DQSTiming_D\n");
 		DQSTiming_D(pMCTstat, pDCTstatA, allow_config_restore);	/* Get Receiver Enable and DQS signal timing*/
 
+		printk(BIOS_DEBUG, "Returned from DQSTiming_D\n");
 		if (!is_fam15h()) {
 			printk(BIOS_DEBUG, "mctAutoInitMCT_D: UMAMemTyping_D\n");
 			UMAMemTyping_D(pMCTstat, pDCTstatA);	/* Fix up for UMA sizing */
@@ -2785,11 +2784,14 @@ restartinit:
 			mct_OtherTiming(pMCTstat, pDCTstatA);
 		}
 
+		printk(BIOS_DEBUG, "ReconfigureDIMMspare_D...\n");
 		if (ReconfigureDIMMspare_D(pMCTstat, pDCTstatA)) { /* RESET# if 1st pass of DIMM spare enabled*/
 			goto restartinit;
 		}
 
+		printk(BIOS_DEBUG, "InterleaveNodes_D...\n");
 		InterleaveNodes_D(pMCTstat, pDCTstatA);
+		printk(BIOS_DEBUG, "InterleaveChannels_D...\n");
 		InterleaveChannels_D(pMCTstat, pDCTstatA);
 
 		ecc_enabled = 1;
@@ -3522,13 +3524,20 @@ static void exit_training_mode_fam15(struct MCTStatStruc *pMCTstat,
 {
 	uint8_t node;
 	uint8_t dct;
+	uint8_t maxdct;
+
+	if (is_fam16h()) {
+		maxdct = 1;
+	} else {
+		maxdct = 2;
+	}
 
 	for (node = 0; node < MAX_NODES_SUPPORTED; node++) {
 		struct DCTStatStruc *pDCTstat;
 		pDCTstat = pDCTstatA + node;
 
 		if (pDCTstat->NodePresent)
-			for (dct = 0; dct < 2; dct++)
+			for (dct = 0; dct < maxdct; dct++)
 				fam15EnableTrainingMode(pMCTstat, pDCTstat, dct, 0);
 	}
 }
@@ -3583,10 +3592,13 @@ retry_dqs_training_and_levelization:
 
 	if (nv_DQSTrainCTL) {
 		mct_WriteLevelization_HW(pMCTstat, pDCTstatA, FirstPass);
+		printk(BIOS_DEBUG, "mct_WriteLevelization_HW1 done\n");
 
 		if (is_fam15h()) {
 			/* Receiver Enable Training Pass 1 */
+			printk(BIOS_DEBUG, "TrainReceiverEn_D...\n");
 			TrainReceiverEn_D(pMCTstat, pDCTstatA, FirstPass);
+			printk(BIOS_DEBUG, "TrainReceiverEn_D done\n");
 		}
 
 		mct_WriteLevelization_HW(pMCTstat, pDCTstatA, SecondPass);
@@ -3666,9 +3678,13 @@ retry_dqs_training_and_levelization:
 		else
 			mctSetEccDQSRcvrEn_D(pMCTstat, pDCTstatA);
 	} else {
+		printk(BIOS_DEBUG, "mct_WriteLevelization_HW2...\n");
 		mct_WriteLevelization_HW(pMCTstat, pDCTstatA, FirstPass);
+		printk(BIOS_DEBUG, "mct_WriteLevelization_HW2 done\n");
 
+		printk(BIOS_DEBUG, "mct_WriteLevelization_HW2b...\n");
 		mct_WriteLevelization_HW(pMCTstat, pDCTstatA, SecondPass);
+		printk(BIOS_DEBUG, "mct_WriteLevelization_HW2b done\n");
 
 #if IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)
 		printk(BIOS_DEBUG, "mctAutoInitMCT_D: Restoring DIMM training configuration from NVRAM\n");
@@ -3696,6 +3712,7 @@ retry_dqs_training_and_levelization:
 
 	/* FIXME - currently uses calculated value	TrainMaxReadLatency_D(pMCTstat, pDCTstatA); */
 	mctHookAfterAnyTraining();
+	printk(BIOS_DEBUG, "Got to end of DQSTiming_D\n");
 }
 
 static void LoadDQSSigTmgRegs_D(struct MCTStatStruc *pMCTstat,

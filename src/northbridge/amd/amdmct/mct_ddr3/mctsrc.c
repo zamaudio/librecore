@@ -54,6 +54,21 @@ static uint8_t is_fam15h(void)
 	return fam15h;
 }
 
+static uint8_t is_fam16h(void)
+{
+	uint8_t fam16h = 0;
+	uint32_t family;
+
+	family = cpuid_eax(0x80000001);
+	family = ((family & 0xf00000) >> 16) | ((family & 0xf00) >> 8);
+
+	if (family == 0x7f)
+		/* Family 16h */
+		fam16h = 1;
+
+	return fam16h;
+}
+
 /* Warning:  These must be located so they do not cross a logical 16-bit
    segment boundary! */
 const u32 TestPattern0_D[] = {
@@ -1224,7 +1239,11 @@ static void dqsTrainRcvrEn_SW_Fam15(struct MCTStatStruc *pMCTstat,
 	dev = pDCTstat->dev_dct;
 	index_reg = 0x98;
 	ch_start = 0;
-	ch_end = 2;
+	if (is_fam16h()) {
+		ch_end = 1;
+	} else {
+		ch_end = 2;
+	}
 
 	for (ch = ch_start; ch < ch_end; ch++) {
 		uint8_t max_rd_latency = 0x55;
@@ -1269,7 +1288,7 @@ static void dqsTrainRcvrEn_SW_Fam15(struct MCTStatStruc *pMCTstat,
 	Errors = 0;
 	dev = pDCTstat->dev_dct;
 
-	for (Channel = 0; Channel < 2; Channel++) {
+	for (Channel = 0; Channel < ch_end; Channel++) {
 		print_debug_dqs("\tTrainRcvEn51: Node ", pDCTstat->Node_ID, 1);
 		print_debug_dqs("\tTrainRcvEn51: Channel ", Channel, 1);
 		pDCTstat->Channel = Channel;
@@ -1512,7 +1531,7 @@ static void dqsTrainRcvrEn_SW_Fam15(struct MCTStatStruc *pMCTstat,
 	{
 		u8 ChannelDTD;
 		printk(BIOS_DEBUG, "TrainRcvrEn: CH_MaxRdLat:\n");
-		for (ChannelDTD = 0; ChannelDTD < 2; ChannelDTD++) {
+		for (ChannelDTD = 0; ChannelDTD < ch_end; ChannelDTD++) {
 			printk(BIOS_DEBUG, "Channel:%x: %x\n",
 			       ChannelDTD, pDCTstat->CH_MaxRdLat[ChannelDTD][0]);
 		}
@@ -1527,7 +1546,7 @@ static void dqsTrainRcvrEn_SW_Fam15(struct MCTStatStruc *pMCTstat,
 		u16 *p;
 
 		printk(BIOS_DEBUG, "TrainRcvrEn: CH_D_B_RCVRDLY:\n");
-		for (ChannelDTD = 0; ChannelDTD < 2; ChannelDTD++) {
+		for (ChannelDTD = 0; ChannelDTD < ch_end; ChannelDTD++) {
 			printk(BIOS_DEBUG, "Channel:%x\n", ChannelDTD);
 			for (ReceiverDTD = 0; ReceiverDTD < 8; ReceiverDTD+=2) {
 				printk(BIOS_DEBUG, "\t\tReceiver:%x:", ReceiverDTD);
@@ -1627,7 +1646,13 @@ void dqsTrainMaxRdLatency_SW_Fam15(struct MCTStatStruc *pMCTstat,
 	Errors = 0;
 	dev = pDCTstat->dev_dct;
 
-	for (Channel = 0; Channel < 2; Channel++) {
+	uint8_t maxch;
+	if (is_fam16h()) {
+		maxch = 1;
+	} else {
+		maxch = 2;
+	}
+	for (Channel = 0; Channel < maxch; Channel++) {
 		print_debug_dqs("\tTrainMaxRdLatency51: Node ", pDCTstat->Node_ID, 1);
 		print_debug_dqs("\tTrainMaxRdLatency51: Channel ", Channel, 1);
 		pDCTstat->Channel = Channel;
@@ -1732,7 +1757,7 @@ void dqsTrainMaxRdLatency_SW_Fam15(struct MCTStatStruc *pMCTstat,
 	{
 		u8 ChannelDTD;
 		printk(BIOS_DEBUG, "TrainMaxRdLatency: CH_MaxRdLat:\n");
-		for (ChannelDTD = 0; ChannelDTD < 2; ChannelDTD++) {
+		for (ChannelDTD = 0; ChannelDTD < maxch; ChannelDTD++) {
 			printk(BIOS_DEBUG, "Channel:%x: %x\n",
 			       ChannelDTD, pDCTstat->CH_MaxRdLat[ChannelDTD][0]);
 		}

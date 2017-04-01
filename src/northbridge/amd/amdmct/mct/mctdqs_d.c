@@ -195,9 +195,9 @@ void TrainReceiverEn_D(struct MCTStatStruc *pMCTstat,
 	for (Node = 0; Node < MAX_NODES_SUPPORTED; Node++) {
 		pDCTstat = pDCTstatA + Node;
 
-/*FIXME: needed?		if (!pDCTstat->NodePresent)
+		if (!pDCTstat->NodePresent)
 			break;
-*/
+
 		if (pDCTstat->DCTSysLimit) {
 			mct_TrainRcvrEn_D(pMCTstat, pDCTstat, Pass);
 		}

@@ -62,8 +62,20 @@ static uint8_t is_fam15h(void)
 	return fam15h;
 }
 
-#define DQS_TRAIN_DEBUG 0
-// #define PRINT_PASS_FAIL_BITMAPS 1
+static uint8_t is_fam16h(void)
+{
+	uint8_t fam16h = 0;
+	uint32_t family;
+
+	family = cpuid_eax(0x80000001);
+	family = ((family & 0xf00000) >> 16) | ((family & 0xf00) >> 8);
+
+	if (family == 0x7f)
+		/* Family 16h */
+		fam16h = 1;
+
+	return fam16h;
+}
 
 void print_debug_dqs(const char *str, u32 val, u8 level)
 {
@@ -1656,26 +1668,39 @@ static void TrainDQSReceiverEnCyc_D_Fam15(struct MCTStatStruc *pMCTstat,
 	lo |= (1<<17);		/* HWCR.wrap32dis */
 	_WRMSR(addr, lo, hi);	/* allow 64-bit memory references in real mode */
 
+	printk(BIOS_DEBUG, "ZERO\n");
 	/* Disable ECC correction of reads on the dram bus. */
 	_DisableDramECC = mct_DisableDimmEccEn_D(pMCTstat, pDCTstat);
+	printk(BIOS_DEBUG, "ZERO after ECC\n");
 
 	Errors = 0;
 
-	for (dct = 0; dct < 2; dct++) {
-		/* Program D18F2x9C_x0D0F_E003_dct[1:0][DisAutoComp, DisablePredriverCal] */
-		/* NOTE: DisablePredriverCal only takes effect when set on DCT 0 */
-		dword = Get_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003);
-		dword &= ~(0x3 << 13);
-		dword |= (0x1 << 13);
-		Set_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003, dword);
+	if (!is_fam16h()) {
+		for (dct = 0; dct < 2; dct++) {
+			/* Program D18F2x9C_x0D0F_E003_dct[1:0][DisAutoComp, DisablePredriverCal] */
+			/* NOTE: DisablePredriverCal only takes effect when set on DCT 0 */
+			dword = Get_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003);
+			dword &= ~(0x3 << 13);
+			dword |= (0x1 << 13);
+			Set_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003, dword);
+		}
 	}
 
-	for (dct = 0; dct < 2; dct++) {
+	uint8_t maxdct;
+	if (is_fam16h()) {
+		maxdct = 1;
+	} else {
+		maxdct = 2;
+	}
+	for (dct = 0; dct < maxdct; dct++) {
 		/* 2.10.5.6 */
+		printk(BIOS_DEBUG, "ONE\n");
 		fam15EnableTrainingMode(pMCTstat, pDCTstat, dct, 1);
+		printk(BIOS_DEBUG, "TWO\n");
 
 		/* 2.10.5.8.3 */
 		Receiver = mct_InitReceiver_D(pDCTstat, dct);
+		printk(BIOS_DEBUG, "THREE\n");
 
 		/* Indicate success unless training the DCT explicitly fails */
 		dct_training_success = 1;

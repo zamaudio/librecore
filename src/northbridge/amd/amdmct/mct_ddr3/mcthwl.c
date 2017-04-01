@@ -126,9 +126,13 @@ static uint8_t PhyWLPass1(struct MCTStatStruc *pMCTstat,
 		PrepareC_DCT(pMCTstat, pDCTstat, dct);
 		for (dimm = 0; dimm < MAX_DIMMS_SUPPORTED; dimm ++) {
 			if (DIMMValid & (1 << (dimm << 1))) {
+				printk(BIOS_INFO, "Phase1...");
 				status |= AgesaHwWlPhase1(pMCTstat, pDCTstat, dct, dimm, FirstPass);
+				printk(BIOS_INFO, "Phase1 done\nPhase2...");
 				status |= AgesaHwWlPhase2(pMCTstat, pDCTstat, dct, dimm, FirstPass);
+				printk(BIOS_INFO, "Phase2 done\nPhase3...");
 				status |= AgesaHwWlPhase3(pMCTstat, pDCTstat, dct, dimm, FirstPass);
+				printk(BIOS_INFO, "Phase3 done\n");
 			}
 		}
 	}
@@ -220,8 +224,11 @@ static void WriteLevelization_HW(struct MCTStatStruc *pMCTstat,
 		do {
 			status = 0;
 			timeout++;
+			printk(BIOS_INFO, "PhyWLPass1...");
 			status |= PhyWLPass1(pMCTstat, pDCTstat, 0);
+			printk(BIOS_INFO, "PhyWLPass1 done\nPhyWLPass2...");
 			status |= PhyWLPass1(pMCTstat, pDCTstat, 1);
+			printk(BIOS_INFO, "PhyWLPass2 done\n");
 			if (status)
 				printk(BIOS_INFO,
 					"%s: Retrying write levelling due to invalid value(s) detected in first phase\n",
@@ -280,9 +287,14 @@ static void WriteLevelization_HW(struct MCTStatStruc *pMCTstat,
 		}
 	}
 
-	SetEccWrDQS_D(pMCTstat, pDCTstat);
+	if (is_ecc_enabled(pMCTstat, pDCTstat)) {
+		SetEccWrDQS_D(pMCTstat, pDCTstat);
+	}
+	printk(BIOS_INFO, "EnableAutoRefresh_D...\n");
 	EnableAutoRefresh_D(pMCTstat, pDCTstat);
+	printk(BIOS_INFO, "EnableAutoRefresh_D done\nEnableZQcalib...");
 	EnableZQcalibration(pMCTstat, pDCTstat);
+	printk(BIOS_INFO, "EnableZQcalib done\n");
 }
 
 void mct_WriteLevelization_HW(struct MCTStatStruc *pMCTstat,

@@ -20,7 +20,8 @@
 #ifndef MCT_D_H
 #define MCT_D_H
 
-#define DQS_TRAIN_DEBUG 0
+#define DQS_TRAIN_DEBUG 1
+#define PRINT_PASS_FAIL_BITMAPS 1
 
 #include <inttypes.h>
 #include <northbridge/amd/amdfam10/raminit.h>
@@ -1026,6 +1027,7 @@ void InterleaveNodes_D(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTs
 void InterleaveChannels_D(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstatA);
 void mct_BeforeDQSTrain_Samp_D(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstat);
 
+uint8_t is_ecc_enabled(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstat);
 void phyAssistedMemFnceTraining(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstatA, int16_t Node);
 u8 mct_SaveRcvEnDly_D_1Pass(struct DCTStatStruc *pDCTstat, u8 pass);
 u8 mct_InitReceiver_D(struct DCTStatStruc *pDCTstat, u8 dct);
