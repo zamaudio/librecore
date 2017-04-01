@@ -1292,6 +1292,12 @@ static uint8_t TrainDQSRdWrPos_D_Fam15(struct MCTStatStruc *pMCTstat,
 	uint8_t best_pos = 0;
 	uint8_t best_count = 0;
 
+	uint8_t maxch;
+	if (is_fam16h()) {
+		maxch = 1;
+	} else {
+		maxch = 2;
+	}
 	uint32_t index_reg = 0x98;
 	uint32_t dev = pDCTstat->dev_dct;
 
@@ -1593,7 +1599,7 @@ static uint8_t TrainDQSRdWrPos_D_Fam15(struct MCTStatStruc *pMCTstat,
 				} else {
 					printk(BIOS_DEBUG, "TrainDQSRdWrPos: CH_D_DIR_B_DQS RD:\n");
 				}
-				for (ChannelDTD = 0; ChannelDTD < 2; ChannelDTD++) {
+				for (ChannelDTD = 0; ChannelDTD < maxch; ChannelDTD++) {
 					printk(BIOS_DEBUG, "Channel: %02x\n", ChannelDTD);
 					for (ReceiverDTD = 0; ReceiverDTD < MAX_CS_SUPPORTED; ReceiverDTD += 2) {
 						printk(BIOS_DEBUG, "\t\tReceiver: %02x:", ReceiverDTD);
