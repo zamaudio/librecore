@@ -1099,6 +1099,8 @@ void procConfig(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstat, ui
 			} else if (package_type == PT_FM2) {
 				/* Socket FM2: Fam15h M10 BKDG 3.12 Table 42 */
 				Seed_Total = 0x15;
+			} else if (package_type == PT_FT3) {
+				Seed_Total = 0x15;
 			}
 			if (pDCTData->Status[DCT_STATUS_REGISTERED])
 				Seed_Total += ((AddrCmdPrelaunch)?0x10:0x0);

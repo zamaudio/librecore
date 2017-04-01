@@ -8,7 +8,7 @@ if CPU_AMD_SOCKET_BGA_F16KB
 
 config CPU_SOCKET_TYPE
 	hex
-	default 0x11
+	default 0x17
 
 config EXT_RT_TBL_SUPPORT
 	bool

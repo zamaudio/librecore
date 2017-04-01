@@ -25,6 +25,9 @@ endif
 ifeq ($(CONFIG_CPU_SOCKET_TYPE), 0x12)
 romstage-y += mctardk6.c
 endif
+ifeq ($(CONFIG_CPU_SOCKET_TYPE), 0x17)
+romstage-y += mctardk7.c
+endif
 
 ramstage-$(CONFIG_HAVE_ACPI_RESUME) += s3utils.c
 
