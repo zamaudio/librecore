@@ -297,13 +297,11 @@ uint8_t fam15_rttwr(struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t dimm, ui
 	} else if (is_fam15h() && is_fam16h()) {
 		/* UDIMM */
 		/* Socket FT3: Fam16h */
-		if (MaxDimmsInstallable == 1) {
+		if (number_of_dimms == 1) {
 			term = 0x0;
-		} else if (MaxDimmsInstallable == 2) {
-			if ((number_of_dimms == 2) && (frequency_index >= 0x12)) {
+		} else if (number_of_dimms == 2) {
+			if (frequency_index > 0xe) {
 				term = 0x1;
-			} else if (number_of_dimms == 1) {
-				term = 0x0;
 			} else {
 				term = 0x2;
 			}
