@@ -1916,6 +1916,29 @@ uint8_t fam15h_slow_access_mode(struct DCTStatStruc *pDCTstat, uint8_t dct)
 			 * 3 DIMM/channel support unimplemented
 			 */
 		}
+	} else if (package_type == PT_FT3) {
+		/* Socket FT3 */
+		/* UDIMM */
+		/* Fam16h */
+		rank_count_dimm0 = pDCTstat->DimmRanks[(0 * 2) + dct];
+		rank_count_dimm1 = pDCTstat->DimmRanks[(1 * 2) + dct];
+		if (MaxDimmsInstallable == 1) {
+			if (MemClkFreq > 0xe) {
+				if (rank_count_dimm0 == 2 || rank_count_dimm1 == 2) {
+					slow_access = 1;
+				}
+			}
+		} else if (MaxDimmsInstallable == 2) {
+			if (dimm_count == 1) {
+				if (MemClkFreq > 0xe) {
+					if (rank_count_dimm0 == 2 || rank_count_dimm1 == 2) {
+						slow_access = 1;
+					}
+				}
+			} else if (dimm_count == 2) {
+				slow_access = 1;
+			}
+		}
 	} else {
 		/* TODO
 		 * Other socket support unimplemented
