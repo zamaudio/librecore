@@ -262,6 +262,9 @@ static uint16_t fam15_receiver_enable_training_seed(struct DCTStatStruc *pDCTsta
 		} else if (package_type == PT_FM2) {
 			/* Socket FM2: Fam15h Model10 BKDG 3.12 Table 43 */
 			seed = 0x32;
+		} else if (package_type == PT_FT3) {
+			/* Socket FT3: Fam16h */
+			seed = 0x32;
 		}
 	}
 
