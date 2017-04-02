@@ -7206,17 +7206,28 @@ void InitPhyCompensation(struct MCTStatStruc *pMCTstat,
 		uint32_t tx_pre;
 		uint32_t drive_strength;
 
-		/* Program D18F2x9C_x0D0F_E003_dct[1:0][DisAutoComp] */
-		dword = Get_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003);
-		dword |= (0x1 << 14);
-		Set_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003, dword);
+		if (!is_fam16h()) {
+			/* Program D18F2x9C_x0D0F_E003_dct[1:0][DisAutoComp] */
+			dword = Get_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003);
+			dword |= (0x1 << 14);
+			Set_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003, dword);
 
-		/* Program D18F2x9C_x0D0F_E003_dct[1:0][DisablePredriverCal] */
-		/* NOTE: DisablePredriverCal only takes effect when set on DCT 0 */
-		dword = Get_NB32_index_wait_DCT(dev, 0, index_reg, 0x0d0fe003);
-		dword |= (0x1 << 13);
-		Set_NB32_index_wait_DCT(dev, 0, index_reg, 0x0d0fe003, dword);
+			/* Program D18F2x9C_x0D0F_E003_dct[1:0][DisablePredriverCal] */
+			/* NOTE: DisablePredriverCal only takes effect when set on DCT 0 */
+			dword = Get_NB32_index_wait_DCT(dev, 0, index_reg, 0x0d0fe003);
+			dword |= (0x1 << 13);
+			Set_NB32_index_wait_DCT(dev, 0, index_reg, 0x0d0fe003, dword);
+		} else if (is_fam16h()) {
+			/* Program D18F2x9C_x0000_0008_dct[0][DisAutoComp] */
+			dword = Get_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008);
+			dword |= (0x1 << 30);
+			Set_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008, dword);
 
+			/* Program D18F2x9C_x0000_0008_dct[0][DisablePredriverCal] */
+			dword = Get_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008);
+			dword |= (0x1 << 29);
+			Set_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008, dword);
+		}
 		/* Determine TxPreP/TxPreN for data lanes (Stage 1) */
 		dword = Get_NB32_index_wait_DCT(dev, dct, index_reg, 0x00000000);
 		drive_strength = (dword >> 20) & 0x7;	/* DqsDrvStren */
@@ -7349,6 +7360,13 @@ void InitPhyCompensation(struct MCTStatStruc *pMCTstat,
 				}
 			}
 			printk(BIOS_DEBUG, "done!\n");
+		}
+
+		if (is_fam16h()) {
+			/* Program D18F2x9C_x0000_0008_dct[0][~DisAutoComp] */
+			dword = Get_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008);
+			dword &= ~(0x1 << 30);
+			Set_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008, dword);
 		}
 	} else {
 		dword = Get_NB32_index_wait_DCT(dev, dct, index_reg, 0x00);

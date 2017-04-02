@@ -1690,8 +1690,13 @@ static void TrainDQSReceiverEnCyc_D_Fam15(struct MCTStatStruc *pMCTstat,
 			dword |= (0x1 << 13);
 			Set_NB32_index_wait_DCT(dev, dct, index_reg, 0x0d0fe003, dword);
 		}
+	} else if (is_fam16h()) {
+		/* Program D18F2x9C_x0000_0008_dct[0][~DisAutoComp, DisablePredriverCal] */
+		dword = Get_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008);
+		dword &= ~(0x3 << 29);
+		dword |= (0x1 << 29);
+		Set_NB32_index_wait_DCT(dev, 0, index_reg, 0x00000008, dword);
 	}
-
 	uint8_t maxdct;
 	if (is_fam16h()) {
 		maxdct = 1;
