@@ -53,9 +53,9 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 	*ODC_CTL = 0;
 	*CMDmode = 1;
 
-	if (Speed == 4 || Speed == 5) {
+	if (Speed == 3 || Speed == 4) {
 		*AddrTmgCTL = 0x00000000;
-	} else if (Speed == 6) {
+	} else if (Speed == 5) {
 		if (MAAdimms == 1) {
 			if (DATAAload == 1)
 				*AddrTmgCTL = 0x003D3D3D;
@@ -64,7 +64,7 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 		} else {
 			*AddrTmgCTL = 0x00000000;
 		}
-	} else if (Speed == 7) {
+	} else if (Speed == 6) {
 		if (MAAdimms == 1) {
 			if (DATAAload == 1)
 				*AddrTmgCTL = 0x003D3D3D;
@@ -73,7 +73,7 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 		} else {
 			*AddrTmgCTL = 0x00000000;
 		}
-	} else if (Speed >= 8) {
+	} else if (Speed >= 7) {
 		if (MAAdimms == 1) {
 			if (DATAAload == 1)
 				*AddrTmgCTL = 0x003C3C3C;
@@ -86,31 +86,31 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 		*AddrTmgCTL = 0x00000000;
 	}
 
-	if (Speed == 4) {
+	if (Speed == 3) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x00002222;
 		} else {
 			*ODC_CTL = 0x10222323;
 		}
-	} else if (Speed == 5) {
+	} else if (Speed == 4) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x00002222;
 		} else {
 			*ODC_CTL = 0x20222323;
 		}
-	} else if (Speed == 6) {
+	} else if (Speed == 5) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x10002222;
 		} else {
 			*ODC_CTL = 0x30222323;
 		}
-	} else if (Speed == 7) {
+	} else if (Speed == 6) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x20112222;
 		} else {
 			*ODC_CTL = 0x30222323;
 		}
-	} else if (Speed == 8) {
+	} else if (Speed == 7) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x30332222;
 		} else {
