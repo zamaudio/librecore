@@ -5090,7 +5090,8 @@ static void SPDGetTCL_D(struct MCTStatStruc *pMCTstat,
 u8 PlatformSpec_D(struct MCTStatStruc *pMCTstat,
 				struct DCTStatStruc *pDCTstat, u8 dct)
 {
-	if (!is_fam15h()) {
+	/* XXX fam15 doesnt need this but fam16 has socket mctardk7.c defs */
+	if (!is_fam15h() || is_fam16h()) {
 		mctGet_PS_Cfg_D(pMCTstat, pDCTstat, dct);
 
 		if (pDCTstat->GangedMode == 1) {

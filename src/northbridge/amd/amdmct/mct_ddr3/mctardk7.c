@@ -16,21 +16,34 @@
  */
 
 #include <inttypes.h>
+#include <console/console.h>
 #include "mct_d.h"
 #include "mct_d_gcc.h"
 
 /* This is for socket FT3 Fam16h
  */
 
+static uint16_t fam15h_next_highest_memclk_freq(uint16_t memclk_freq);
 static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 				u8 DATAAload, u32 *AddrTmgCTL, u32 *ODC_CTL,
 				u8 *CMDmode);
 
+static uint16_t fam15h_next_highest_memclk_freq(uint16_t memclk_freq)
+{
+	uint16_t fam15h_next_highest_freq_tab[] = {0, 0, 0, 0, 0x6, 0, 0xa, 0, 0, 0, 0xe, 0, 0, 0, 0x12, 0, 0, 0, 0x16, 0, 0, 0, 0x16};
+	return fam15h_next_highest_freq_tab[memclk_freq];
+}
 
 void mctGet_PS_Cfg_D(struct MCTStatStruc *pMCTstat,
 			 struct DCTStatStruc *pDCTstat, u32 dct)
 {
-	Get_ChannelPS_Cfg0_D(pDCTstat->MAdimms[dct], pDCTstat->Speed,
+	u16 speed = pDCTstat->Speed;
+
+	if (pDCTstat->TargetFreq > pDCTstat->Speed) {
+		speed = fam15h_next_highest_memclk_freq(speed);
+	}
+
+	Get_ChannelPS_Cfg0_D(pDCTstat->MAdimms[dct], speed,
 				pDCTstat->MAload[dct], pDCTstat->DATAload[dct],
 				&(pDCTstat->CH_ADDR_TMG[dct]), &(pDCTstat->CH_ODC_CTL[dct]),
 				&pDCTstat->_2Tmode);
@@ -53,9 +66,9 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 	*ODC_CTL = 0;
 	*CMDmode = 1;
 
-	if (Speed == 3 || Speed == 4) {
+	if (Speed == 4 || Speed == 6) {
 		*AddrTmgCTL = 0x00000000;
-	} else if (Speed == 5) {
+	} else if (Speed == 0xa) {
 		if (MAAdimms == 1) {
 			if (DATAAload == 1)
 				*AddrTmgCTL = 0x003D3D3D;
@@ -64,7 +77,7 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 		} else {
 			*AddrTmgCTL = 0x00000000;
 		}
-	} else if (Speed == 6) {
+	} else if (Speed == 0xe) {
 		if (MAAdimms == 1) {
 			if (DATAAload == 1)
 				*AddrTmgCTL = 0x003D3D3D;
@@ -73,7 +86,7 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 		} else {
 			*AddrTmgCTL = 0x00000000;
 		}
-	} else if (Speed >= 7) {
+	} else if (Speed >= 0x12) {
 		if (MAAdimms == 1) {
 			if (DATAAload == 1)
 				*AddrTmgCTL = 0x003C3C3C;
@@ -86,31 +99,31 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 		*AddrTmgCTL = 0x00000000;
 	}
 
-	if (Speed == 3) {
+	if (Speed == 4) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x00002222;
 		} else {
 			*ODC_CTL = 0x10222323;
 		}
-	} else if (Speed == 4) {
+	} else if (Speed == 6) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x00002222;
 		} else {
 			*ODC_CTL = 0x20222323;
 		}
-	} else if (Speed == 5) {
+	} else if (Speed == 0xa) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x10002222;
 		} else {
 			*ODC_CTL = 0x30222323;
 		}
-	} else if (Speed == 6) {
+	} else if (Speed == 0xe) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x20112222;
 		} else {
 			*ODC_CTL = 0x30222323;
 		}
-	} else if (Speed == 7) {
+	} else if (Speed == 0x12) {
 		if (MAAdimms == 1) {
 			*ODC_CTL = 0x30332222;
 		} else {
@@ -123,4 +136,7 @@ static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 			*ODC_CTL = 0x30222323;
 		}
 	}
+
+	printk(BIOS_DEBUG, "FAM16h: Speed=0x%02x ADDR_TMG=%08x ODC_CTL=%08x\n",
+			Speed, *AddrTmgCTL, *ODC_CTL);
 }
