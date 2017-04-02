@@ -708,6 +708,21 @@ static uint32_t fam15h_phy_predriver_calibration_code(struct DCTStatStruc *pDCTs
 					calibration_code = 0xff6;
 				}
 			}
+		} else if (package_type == PT_FT3) {
+			/* Fam16h */
+			/* Socket FT3 */
+			if (ddr_voltage_index & 0x1) {
+				/* 1.5V */
+				if (drive_strength == 0) {
+					calibration_code = 0xfff;
+				} else if (drive_strength == 1) {
+					calibration_code = 0x410;
+				} else if (drive_strength == 2) {
+					calibration_code = 0x208;
+				} else {
+					calibration_code = 0x104;
+				}
+			}
 		}
 	} else {
 		/* LRDIMM */
@@ -729,110 +744,130 @@ static uint32_t fam15h_phy_predriver_cmd_addr_calibration_code(struct DCTStatStr
 
 	ddr_voltage_index = dct_ddr_voltage_index(pDCTstat, dct);
 
-	if (ddr_voltage_index & 0x4) {
-		/* 1.25V */
-		/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 52 */
-		if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
-			/* DDR3-667 - DDR3-800 */
-			if (drive_strength == 0x0)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x492;
-		} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
-			/* DDR3-1066 - DDR3-1333 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xdad;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x6db;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x492;
-		} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
-			/* DDR3-1600 - DDR3-1866 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xdad;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xb64;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xb64;
+	if (is_fam15h() && !is_fam16h()) {
+		if (ddr_voltage_index & 0x4) {
+			/* 1.25V */
+			/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 52 */
+			if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
+				/* DDR3-667 - DDR3-800 */
+				if (drive_strength == 0x0)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x492;
+			} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
+				/* DDR3-1066 - DDR3-1333 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xdad;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x6db;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x492;
+			} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
+				/* DDR3-1600 - DDR3-1866 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xdad;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xb64;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xb64;
+			}
+		} else if (ddr_voltage_index & 0x2) {
+			/* 1.35V */
+			/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 51 */
+			if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
+				/* DDR3-667 - DDR3-800 */
+				if (drive_strength == 0x0)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x492;
+			} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
+				/* DDR3-1066 - DDR3-1333 */
+				if (drive_strength == 0x0)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x6db;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x6db;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x6db;
+			} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
+				/* DDR3-1600 - DDR3-1866 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xb6d;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xb6d;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x924;
+			}
+		} else if (ddr_voltage_index & 0x1) {
+			/* 1.5V */
+			/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 50 */
+			if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
+				/* DDR3-667 - DDR3-800 */
+				if (drive_strength == 0x0)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x492;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x492;
+			} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
+				/* DDR3-1066 - DDR3-1333 */
+				if (drive_strength == 0x0)
+					calibration_code = 0x6db;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x6db;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x6db;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x6db;
+			} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
+				/* DDR3-1600 - DDR3-1866 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xb6d;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xb6d;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xb6d;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xb6d;
+			}
 		}
-	} else if (ddr_voltage_index & 0x2) {
-		/* 1.35V */
-		/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 51 */
-		if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
-			/* DDR3-667 - DDR3-800 */
-			if (drive_strength == 0x0)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x492;
-		} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
-			/* DDR3-1066 - DDR3-1333 */
-			if (drive_strength == 0x0)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x6db;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x6db;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x6db;
-		} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
-			/* DDR3-1600 - DDR3-1866 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xb6d;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xb6d;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x924;
-		}
-	} else if (ddr_voltage_index & 0x1) {
-		/* 1.5V */
-		/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 50 */
-		if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
-			/* DDR3-667 - DDR3-800 */
-			if (drive_strength == 0x0)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x492;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x492;
-		} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
-			/* DDR3-1066 - DDR3-1333 */
-			if (drive_strength == 0x0)
-				calibration_code = 0x6db;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x6db;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x6db;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x6db;
-		} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
-			/* DDR3-1600 - DDR3-1866 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xb6d;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xb6d;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xb6d;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xb6d;
+	} else if (is_fam16h()) {
+		/* Fam16h */
+		/* Socket FT3 */
+		if (ddr_voltage_index & 0x1) {
+			/* 1.5V */
+			if (drive_strength == 0) {
+				calibration_code = 0x082;
+			} else if (drive_strength == 1) {
+				calibration_code = 0x041;
+			} else if (drive_strength == 2) {
+				calibration_code = 0x041;
+			} else if (drive_strength == 3) {
+				calibration_code = 0x041;
+			} else if (drive_strength == 5) {
+				calibration_code = 0x0c3;
+			} else {
+				/* Not defined */
+			}
 		}
 	}
-
 	return calibration_code;
 }
 
@@ -844,110 +879,122 @@ static uint32_t fam15h_phy_predriver_clk_calibration_code(struct DCTStatStruc *p
 
 	ddr_voltage_index = dct_ddr_voltage_index(pDCTstat, dct);
 
-	if (ddr_voltage_index & 0x4) {
-		/* 1.25V */
-		/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 55 */
-		if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
-			/* DDR3-667 - DDR3-800 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xdad;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xdad;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x924;
-		} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
-			/* DDR3-1066 - DDR3-1333 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xff6;
-		} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
-			/* DDR3-1600 - DDR3-1866 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xff6;
+	if (is_fam15h() && !is_fam16h()) {
+		if (ddr_voltage_index & 0x4) {
+			/* 1.25V */
+			/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 55 */
+			if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
+				/* DDR3-667 - DDR3-800 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xdad;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xdad;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x924;
+			} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
+				/* DDR3-1066 - DDR3-1333 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xff6;
+			} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
+				/* DDR3-1600 - DDR3-1866 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xff6;
+			}
+		} else if (ddr_voltage_index & 0x2) {
+			/* 1.35V */
+			/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 54 */
+			if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
+				/* DDR3-667 - DDR3-800 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xdad;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xdad;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x924;
+			} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
+				/* DDR3-1066 - DDR3-1333 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xdad;
+			} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
+				/* DDR3-1600 - DDR3-1866 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xdad;
+			}
+		} else if (ddr_voltage_index & 0x1) {
+			/* 1.5V */
+			/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 53 */
+			if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
+				/* DDR3-667 - DDR3-800 */
+				if (drive_strength == 0x0)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x1)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x2)
+					calibration_code = 0x924;
+				else if (drive_strength == 0x3)
+					calibration_code = 0x924;
+			} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
+				/* DDR3-1066 - DDR3-1333 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xb6d;
+			} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
+				/* DDR3-1600 - DDR3-1866 */
+				if (drive_strength == 0x0)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x1)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x2)
+					calibration_code = 0xff6;
+				else if (drive_strength == 0x3)
+					calibration_code = 0xff6;
+			}
 		}
-	} else if (ddr_voltage_index & 0x2) {
-		/* 1.35V */
-		/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 54 */
-		if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
-			/* DDR3-667 - DDR3-800 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xdad;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xdad;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x924;
-		} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
-			/* DDR3-1066 - DDR3-1333 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xdad;
-		} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
-			/* DDR3-1600 - DDR3-1866 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xdad;
-		}
-	} else if (ddr_voltage_index & 0x1) {
-		/* 1.5V */
-		/* Fam15h BKDG Rev. 3.14 section 2.10.5.3.4 Table 53 */
-		if ((MemClkFreq == 0x4) || (MemClkFreq == 0x6)) {
-			/* DDR3-667 - DDR3-800 */
-			if (drive_strength == 0x0)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x1)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x2)
-				calibration_code = 0x924;
-			else if (drive_strength == 0x3)
-				calibration_code = 0x924;
-		} else if ((MemClkFreq == 0xa) || (MemClkFreq == 0xe)) {
-			/* DDR3-1066 - DDR3-1333 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xb6d;
-		} else if ((MemClkFreq == 0x12) || (MemClkFreq == 0x16)) {
-			/* DDR3-1600 - DDR3-1866 */
-			if (drive_strength == 0x0)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x1)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x2)
-				calibration_code = 0xff6;
-			else if (drive_strength == 0x3)
-				calibration_code = 0xff6;
+	} else if (is_fam16h()) {
+		/* Fam16h */
+		/* Socket FT3 */
+		if (ddr_voltage_index & 0x1) {
+			/* 1.5V */
+			if (drive_strength == 3) {
+				calibration_code = 0x820;
+			} else {
+				calibration_code = 0xfff;
+			}
 		}
 	}
-
 	return calibration_code;
 }
 
@@ -2138,6 +2185,10 @@ static uint8_t fam15h_odt_tristate_enable_code(struct DCTStatStruc *pDCTstat, ui
 		/* Socket FM2 */
 		/* UDIMM */
 		odt_tristate_code = 0x0;
+	} else if (package_type == PT_FT3) {
+		/* Socket FT3 */
+		/* UDIMM */
+		odt_tristate_code = 0x0;
 	} else {
 		/* TODO
 		 * Other socket support unimplemented
@@ -2335,6 +2386,10 @@ static uint8_t fam15h_cs_tristate_enable_code(struct DCTStatStruc *pDCTstat, uin
 		}
 	} else if (package_type == PT_FM2) {
 		/* Socket FM2 */
+		/* UDIMM */
+		cs_tristate_code = 0x0;
+	} else if (package_type == PT_FT3) {
+		/* Socket FT3 */
 		/* UDIMM */
 		cs_tristate_code = 0x0;
 	} else {
