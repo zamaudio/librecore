@@ -2391,7 +2391,7 @@ static uint8_t fam15h_cs_tristate_enable_code(struct DCTStatStruc *pDCTstat, uin
 	} else if (package_type == PT_FT3) {
 		/* Socket FT3 */
 		/* UDIMM */
-		cs_tristate_code = 0x0;
+		cs_tristate_code = 0xf0;
 	} else {
 		/* TODO
 		 * Other socket support unimplemented
