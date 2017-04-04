@@ -8237,6 +8237,14 @@ static void mct_BeforeDQSTrain_D(struct MCTStatStruc *pMCTstat,
 			}
 		}
 	}
+
+	u32 val;
+	if (is_fam16h()) {
+		/* Set MaxRdLatency and RdPtrInit */
+		val = Get_NB32(pDCTstatA->dev_dct, 0x210);
+		val = (val & ~0xffc00000) | (0x55 << 22) | 0x6;
+		Set_NB32(pDCTstatA->dev_dct, 0x210, val);
+	}
 }
 
 /* Erratum 350 */
