@@ -7765,10 +7765,18 @@ static void mct_ProgramODT_D(struct MCTStatStruc *pMCTstat,
 			odt_pattern_3 = 0x00000000;
 		}
 
-		write_odt_duration = 0x0;
-		read_odt_duration = 0x0;
+		uint8_t tcl;
+		uint8_t tcwl;
+		tcl = Get_NB32_DCT(dev, dct, 0x200) & 0x1f;
+		tcwl = Get_NB32_DCT(dev, dct, 0x20c) & 0x1f;
+
+		write_odt_duration = 0x6;
+		read_odt_duration = 0x6;
 		write_odt_delay = 0x0;
-		read_odt_delay = 0x0;
+		if (tcl > tcwl)
+			read_odt_delay = tcl - tcwl;
+		else
+			read_odt_delay = 0x0;
 
 		/* Program ODT pattern */
 		Set_NB32_DCT(dev, dct, 0x230, odt_pattern_1);
