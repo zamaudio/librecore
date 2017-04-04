@@ -23,10 +23,10 @@
 /* This is for socket FT3 Fam16h
  */
 
-static uint16_t fam15h_next_highest_memclk_freq(uint16_t memclk_freq);
 static void Get_ChannelPS_Cfg0_D(u8 MAAdimms, u8 Speed, u8 MAAload,
 				u8 DATAAload, u32 *AddrTmgCTL, u32 *ODC_CTL,
 				u8 *CMDmode);
+static uint16_t fam15h_next_highest_memclk_freq(uint16_t memclk_freq);
 
 static uint16_t fam15h_next_highest_memclk_freq(uint16_t memclk_freq)
 {
@@ -37,10 +37,10 @@ static uint16_t fam15h_next_highest_memclk_freq(uint16_t memclk_freq)
 void mctGet_PS_Cfg_D(struct MCTStatStruc *pMCTstat,
 			 struct DCTStatStruc *pDCTstat, u32 dct)
 {
-	u16 speed = pDCTstat->Speed;
+	u16 speed = pDCTstat->TargetFreq;
 
 	if (pDCTstat->TargetFreq > pDCTstat->Speed) {
-		speed = fam15h_next_highest_memclk_freq(speed);
+		speed = fam15h_next_highest_memclk_freq(pDCTstat->Speed);
 	}
 
 	Get_ChannelPS_Cfg0_D(pDCTstat->MAdimms[dct], speed,

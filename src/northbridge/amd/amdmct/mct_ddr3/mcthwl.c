@@ -35,6 +35,21 @@ static uint8_t is_fam15h(void)
 	return fam15h;
 }
 
+static uint8_t is_fam16h(void)
+{
+	uint8_t fam16h = 0;
+	uint32_t family;
+
+	family = cpuid_eax(0x80000001);
+	family = ((family & 0xf00000) >> 16) | ((family & 0xf00) >> 8);
+
+	if (family == 0x7f)
+		/* Family 16h */
+		fam16h = 1;
+
+	return fam16h;
+}
+
 static void SetEccWrDQS_D(struct MCTStatStruc *pMCTstat, struct DCTStatStruc *pDCTstat)
 {
 	u8 ByteLane, DimmNum, OddByte, Addl_Index, Channel;
@@ -141,7 +156,7 @@ static uint8_t PhyWLPass1(struct MCTStatStruc *pMCTstat,
 }
 
 static uint8_t PhyWLPass2(struct MCTStatStruc *pMCTstat,
-					struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t final)
+					struct DCTStatStruc *pDCTstat, uint8_t dct, uint8_t prevstatus)
 {
 	u8 dimm;
 	u16 DIMMValid;
@@ -169,7 +184,9 @@ static uint8_t PhyWLPass2(struct MCTStatStruc *pMCTstat,
 			fenceDynTraining_D(pMCTstat, pDCTstat, dct);
 		}
 		Restore_OnDimmMirror(pMCTstat, pDCTstat);
-		StartupDCT_D(pMCTstat, pDCTstat, dct);
+		//XXX Redo MRS commands if previous status succeeded because we're on a new freq
+		if (!prevstatus)
+			StartupDCT_D(pMCTstat, pDCTstat, dct);
 		Clear_OnDimmMirror(pMCTstat, pDCTstat);
 		SetDllSpeedUp_D(pMCTstat, pDCTstat, dct);
 		DisableAutoRefresh_D(pMCTstat, pDCTstat);
@@ -198,6 +215,7 @@ static void WriteLevelization_HW(struct MCTStatStruc *pMCTstat,
 					struct DCTStatStruc *pDCTstatA, uint8_t Node, uint8_t Pass)
 {
 	uint8_t status;
+	uint8_t prevstatus;
 	uint8_t timeout;
 	uint16_t final_target_freq;
 
@@ -224,11 +242,9 @@ static void WriteLevelization_HW(struct MCTStatStruc *pMCTstat,
 		do {
 			status = 0;
 			timeout++;
-			printk(BIOS_INFO, "PhyWLPass1...");
 			status |= PhyWLPass1(pMCTstat, pDCTstat, 0);
-			printk(BIOS_INFO, "PhyWLPass1 done\nPhyWLPass2...");
-			status |= PhyWLPass1(pMCTstat, pDCTstat, 1);
-			printk(BIOS_INFO, "PhyWLPass2 done\n");
+			if (!is_fam16h())
+				status |= PhyWLPass1(pMCTstat, pDCTstat, 1);
 			if (status)
 				printk(BIOS_INFO,
 					"%s: Retrying write levelling due to invalid value(s) detected in first phase\n",
@@ -256,15 +272,18 @@ static void WriteLevelization_HW(struct MCTStatStruc *pMCTstat,
 					pDCTstat->TargetFreq = final_target_freq;
 				SetTargetFreq(pMCTstat, pDCTstatA, Node);
 				timeout = 0;
+				prevstatus = 0;
 				do {
 					status = 0;
 					timeout++;
-					status |= PhyWLPass2(pMCTstat, pDCTstat, 0, (pDCTstat->TargetFreq == final_target_freq));
-					status |= PhyWLPass2(pMCTstat, pDCTstat, 1, (pDCTstat->TargetFreq == final_target_freq));
+					status |= PhyWLPass2(pMCTstat, pDCTstat, 0, prevstatus);
+					if (!is_fam16h())
+						status |= PhyWLPass2(pMCTstat, pDCTstat, 1, prevstatus);
 					if (status)
 						printk(BIOS_INFO,
 							"%s: Retrying write levelling due to invalid value(s) detected in last phase\n",
 							__func__);
+					prevstatus = status;
 				} while (status && (timeout < 8));
 				global_phy_training_status |= status;
 			}

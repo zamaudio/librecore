@@ -1256,9 +1256,11 @@ void mct_DramInit_Sw_D(struct MCTStatStruc *pMCTstat,
 			mct_SendMrsCmd(pDCTstat, dct, EMRS);
 			mrsbuffer0 = EMRS & 0xffff;
 
+			/* XXX Dont do this
 			if (pDCTstat->DIMMAutoSpeed == mhz_to_memclk_config(mctGet_NVbits(NV_MIN_MEMCLK)))
 				if (!(pDCTstat->Status & (1 << SB_Registered)))
-					break; /* For UDIMM, only send MR commands once per channel */
+					break; // For UDIMM, only send MR commands once per channel
+			*/
 		}
 		if (pDCTstat->LogicalCPUID & (AMD_DR_Bx/* | AMD_RB_C0 */)) /* TODO: We dont support RB_C0 now. need to be added and tested. */
 			if (!(pDCTstat->Status & (1 << SB_Registered)))
