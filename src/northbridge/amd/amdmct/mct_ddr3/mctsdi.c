@@ -1038,6 +1038,7 @@ static u32 mct_MR0(struct MCTStatStruc *pMCTstat,
 		dword = Get_NB32_DCT(dev, dct, 0x22c) & 0x1f;
 
 		/* Calculate wr_ap (Fam15h BKDG v3.14 Table 82) */
+		/* (0x12 added with Fam16h BKDG) */
 		if (dword == 0x10)
 			wr_ap = 0x0;
 		else if (dword == 0x5)
@@ -1054,11 +1055,14 @@ static u32 mct_MR0(struct MCTStatStruc *pMCTstat,
 			wr_ap = 0x6;
 		else if (dword == 0xe)
 			wr_ap = 0x7;
+		else if (dword == 0x12)
+			wr_ap = 0x9;
 
 		/* Obtain Tcl */
 		dword = Get_NB32_DCT(dev, dct, 0x200) & 0x1f;
 
 		/* Calculate cas_latency (Fam15h BKDG v3.14 Table 83) */
+		/* (0x11 added with Fam16h BKDG) */
 		if (dword == 0x5)
 			cas_latency = 0x2;
 		else if (dword == 0x6)
@@ -1083,6 +1087,8 @@ static u32 mct_MR0(struct MCTStatStruc *pMCTstat,
 			cas_latency = 0x7;
 		else if (dword == 0x10)
 			cas_latency = 0x9;
+		else if (dword == 0x11)
+			cas_latency = 0xb;
 
 		/* Obtain BurstCtrl */
 		burst_length = Get_NB32_DCT(dev, dct, 0x84) & 0x3;
@@ -1164,6 +1170,10 @@ void mct_DramInit_Sw_D(struct MCTStatStruc *pMCTstat,
 {
 	u8 MrsChipSel;
 	u32 dword;
+	u16 mrsbuffer0 = 0;
+	u16 mrsbuffer1 = 0;
+	u16 mrsbuffer2 = 0;
+
 	u32 dev = pDCTstat->dev_dct;
 
 	printk(BIOS_DEBUG, "%s: Start\n", __func__);
@@ -1230,6 +1240,7 @@ void mct_DramInit_Sw_D(struct MCTStatStruc *pMCTstat,
 			EMRS = mct_MR2(pMCTstat, pDCTstat, dct, MrsChipSel);
 			EMRS = swapAddrBits(pDCTstat, EMRS, MrsChipSel, dct);
 			mct_SendMrsCmd(pDCTstat, dct, EMRS);
+			mrsbuffer2 = EMRS & 0xffff;
 			/* 14.Send EMRS(3). Ordinarily at this time, MrsAddress[2:0]=000b */
 			EMRS= mct_MR3(pMCTstat, pDCTstat, dct, MrsChipSel);
 			EMRS = swapAddrBits(pDCTstat, EMRS, MrsChipSel, dct);
@@ -1238,10 +1249,12 @@ void mct_DramInit_Sw_D(struct MCTStatStruc *pMCTstat,
 			EMRS= mct_MR1(pMCTstat, pDCTstat, dct, MrsChipSel);
 			EMRS = swapAddrBits(pDCTstat, EMRS, MrsChipSel, dct);
 			mct_SendMrsCmd(pDCTstat, dct, EMRS);
+			mrsbuffer1 = EMRS & 0xffff;
 			/* 16.Send MRS with MrsAddress[8]=1(reset the DLL) */
 			EMRS= mct_MR0(pMCTstat, pDCTstat, dct, MrsChipSel);
 			EMRS = swapAddrBits(pDCTstat, EMRS, MrsChipSel, dct);
 			mct_SendMrsCmd(pDCTstat, dct, EMRS);
+			mrsbuffer0 = EMRS & 0xffff;
 
 			if (pDCTstat->DIMMAutoSpeed == mhz_to_memclk_config(mctGet_NVbits(NV_MIN_MEMCLK)))
 				if (!(pDCTstat->Status & (1 << SB_Registered)))
@@ -1262,6 +1275,14 @@ void mct_DramInit_Sw_D(struct MCTStatStruc *pMCTstat,
 		dword &= ~(1 << EnDramInit);
 		Set_NB32_DCT(dev, dct, 0x7C, dword);
 		mct_DCTAccessDone(pDCTstat, dct);
+
+		/* FAM16 step only */
+		if (is_fam16h()) {
+			dword = ((u32)mrsbuffer1 << 16) | ((u32)mrsbuffer0 & ~(1 << 8));
+			Set_NB32_DCT(dev, 0, 0x2e8, dword);
+			dword = (u32)mrsbuffer2;
+			Set_NB32_DCT(dev, 0, 0x2ec, dword);
+		}
 	}
 
 	printk(BIOS_DEBUG, "%s: Done\n", __func__);
